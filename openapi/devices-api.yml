@@ -1,0 +1,143 @@
+openapi: 3.0.3
+info:
+  title: Devices API
+  description: REST API for managing devices
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /devices:
+    post:
+      tags:
+        - Devices
+      summary: Create a new device
+      operationId: createdDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRequest'
+      responses:
+        '201':
+          description: Device created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+
+    get:
+      tags:
+        - Devices
+      summary: Fetch All devices
+      operationId: getDevices
+      responses:
+        '200':
+          description: List of devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceResponse'
+
+  /devices/{id}:
+    get:
+      tags:
+        - Devices
+      summary: Fetch a device by id
+      operationId: getDeviceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: int64
+      responses:
+        '200':
+          description: Device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+    put:
+      tags:
+        - Devices
+      summary: Update device
+      operationId: updateDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceRequest'
+      responses:
+        '200':
+          description: Device update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+
+    delete:
+      tags:
+        - Devices
+      summary: Delete a device
+      operationId: deleteDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Device deleted
+
+components:
+  schemas:
+    DeviceRequest:
+      type: object
+      required:
+        - name
+        - brand
+        - state
+      properties:
+        name:
+          type: string
+        brand:
+          type: string
+        state:
+          $ref: '#/components/schemas/DeviceState'
+    DeviceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        brand:
+          type: string
+        state:
+          $ref: '#/components/schemas/DeviceState'
+        created_at:
+          type: string
+          format: date-time
+    DeviceState:
+      type: string
+      enum:
+        - AVAILABLE
+        - IN_USE
+        - INACTIVE
