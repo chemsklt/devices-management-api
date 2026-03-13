@@ -2,6 +2,8 @@ package com.devices.devices_service.service;
 
 import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
+import com.devices.devices_service.exception.DeviceInUseException;
+import com.devices.devices_service.exception.DeviceNotFoundException;
 import com.devices.devices_service.repository.DeviceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,7 @@ public class DeviceService {
     public Device create(Device device){
         log.info("Creating device with name={} and brand={}", device.getName(), device.getBrand());
         Device savedDevice = deviceRepository.save(device);
-        log.info("Device creating successfully with id={}",device.getId());
+        log.info("Device creating successfully with id={}",savedDevice.getId());
         return savedDevice;
     }
 
@@ -33,7 +35,7 @@ public class DeviceService {
         return deviceRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Device not found with id={}", id);
-                    return new RuntimeException("Device not found");
+                    return new DeviceNotFoundException(id);
                 });
     }
 
@@ -43,7 +45,7 @@ public class DeviceService {
 
         if (existing.getState() == DeviceState.IN_USE){
             log.warn("Attempt to update IN_USE device id={}", id);
-            throw new RuntimeException("Cannot modify device that is IN_USE");
+            throw new DeviceInUseException(id);
         }
 
         existing.setName(updatedDevice.getName());
@@ -62,7 +64,7 @@ public class DeviceService {
 
         if (device.getState() == DeviceState.IN_USE) {
             log.warn("Attempt to delete IN_USE device id={}", id);
-            throw new RuntimeException("Cannot delete device that is IN_USE");
+            throw new DeviceInUseException(id);
         }
         deviceRepository.delete(device);
         log.info("Device deleted successfully id={}", id);
