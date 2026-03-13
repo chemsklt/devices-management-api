@@ -7,6 +7,8 @@ import com.devices.devices_service.exception.DeviceNotFoundException;
 import com.devices.devices_service.repository.DeviceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +39,17 @@ public class DeviceService {
                     log.error("Device not found with id={}", id);
                     return new DeviceNotFoundException(id);
                 });
+    }
+
+    public Page<Device> findDevices(DeviceState state, Pageable pageable) {
+
+        log.info("Fetching devices with filter state={}", state);
+
+        if (state != null) {
+            return deviceRepository.findByState(state, pageable);
+        }
+
+        return deviceRepository.findAll(pageable);
     }
 
     public Device update(Long id, Device updatedDevice){

@@ -31,17 +31,39 @@ paths:
     get:
       tags:
         - Devices
-      summary: Fetch All devices
+      summary: Fetch All devices with pagination
       operationId: getDevices
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            example: createdAt,desc
+        - name: state
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/DeviceState'
       responses:
         '200':
-          description: List of devices
+          description: Paginated devices
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DeviceResponse'
+                $ref: '#/components/schemas/DeviceResponse'
 
   /devices/{id}:
     get:
@@ -54,7 +76,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
             format: int64
       responses:
         '200':
@@ -116,8 +138,12 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 100
         brand:
           type: string
+          minLength: 1
+          maxLength: 100
         state:
           $ref: '#/components/schemas/DeviceState'
     DeviceResponse:
@@ -141,3 +167,19 @@ components:
         - AVAILABLE
         - IN_USE
         - INACTIVE
+    PageDeviceResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElement:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
