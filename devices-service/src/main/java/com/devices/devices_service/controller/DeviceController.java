@@ -15,7 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,13 +31,13 @@ public class DeviceController implements DevicesApi {
     private final DeviceMapper deviceMapper;
 
     @Override
-    public ResponseEntity<DeviceResponse> createdDevice(@Valid DeviceRequest deviceRequest) {
+    public ResponseEntity<DeviceResponse> createdDevice(@Valid @RequestBody DeviceRequest deviceRequest) {
         log.info("API request to create device");
         Device device = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.create(device);
 
         DeviceResponse response = deviceMapper.toResponse(saved);
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Override
@@ -61,9 +63,12 @@ public class DeviceController implements DevicesApi {
 
         Sort sortObj = Sort.by("createdAt").descending();
 
-        if (sort != null) {
+        if (sort != null && !sort.isBlank()) {
             String[] parts = sort.split(",");
-            sortObj = Sort.by(Sort.Direction.fromString(parts[1]), parts[0]);
+            String field = parts[0];
+            Sort.Direction direction =
+                    parts.length > 1 ? Sort.Direction.fromString(parts[1]) : Sort.Direction.ASC;
+            sortObj = Sort.by(direction, field);
         }
         Pageable pageable = PageRequest.of(page, size, sortObj);
 
