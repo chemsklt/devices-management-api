@@ -63,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DeviceResponse'
+                $ref: '#/components/schemas/PageDeviceResponse'
 
   /devices/{id}:
     get:
@@ -163,10 +163,7 @@ components:
           format: date-time
     DeviceState:
       type: string
-      enum:
-        - AVAILABLE
-        - IN_USE
-        - INACTIVE
+      x-java-type: com.devices.devices_service.domain.DeviceState
     PageDeviceResponse:
       type: object
       properties:

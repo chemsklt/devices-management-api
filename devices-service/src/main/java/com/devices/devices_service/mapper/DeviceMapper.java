@@ -10,4 +10,13 @@ public interface DeviceMapper {
 
     Device toEntity(DeviceRequest request);
     DeviceResponse toResponse(Device device);
+//    default com.devices.devices_service.domain.DeviceState toDomainState(
+//            com.devices.devices_service.generated.model.DeviceState state) {
+//
+//        if (state == null) {
+//            return null;
+//        }
+//
+//        return com.devices.devices_service.domain.DeviceState.valueOf(state.name());
+//    }
 }

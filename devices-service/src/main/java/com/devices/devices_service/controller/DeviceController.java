@@ -7,6 +7,7 @@ import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
 import com.devices.devices_service.generated.model.PageDeviceResponse;
 import com.devices.devices_service.mapper.DeviceMapper;
+import com.devices.devices_service.mapper.PageDeviceMapper;
 import com.devices.devices_service.service.DeviceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,13 @@ public class DeviceController implements DevicesApi {
 
     private final DeviceService deviceService;
     private final DeviceMapper deviceMapper;
+    private final PageDeviceMapper pageDeviceMapper;
 
     @Override
     public ResponseEntity<DeviceResponse> createdDevice(@Valid @RequestBody DeviceRequest deviceRequest) {
         log.info("API request to create device");
         Device device = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.create(device);
-
         DeviceResponse response = deviceMapper.toResponse(saved);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -44,22 +45,54 @@ public class DeviceController implements DevicesApi {
     public ResponseEntity<Void> deleteDevice(Long id) {
         log.info("API request to delete device id={}", id);
         deviceService.delete(id);
-
         return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<DeviceResponse> getDeviceById(Long id) {
         log.info("API request to fetch device id={}", id);
-
         Device device = deviceService.findById(id);
-
         return ResponseEntity.ok(deviceMapper.toResponse(device));
     }
 
     @Override
-    public ResponseEntity<PageDeviceResponse> getDevices(Integer page, Integer size, String sort, DeviceState state) {
+    public ResponseEntity<PageDeviceResponse> getDevices(Integer page, Integer size, String sort, String state) {
         log.info("API request to fetch all devices page={} size={} sort={}", page, size, sort);
+
+        Pageable pageable = buildPageable(page, size, sort);
+
+        Page<Device> devicePage = deviceService.findDevices(parseState(state), pageable);
+
+
+//        DeviceState domainState = parseState(state);
+//
+//        Page<Device> devicePage = deviceService.findDevices(domainState, pageable);
+//
+//        List<DeviceResponse> devices = devicePage.getContent()
+//                .stream()
+//                .map(deviceMapper::toResponse)
+//                .toList();
+//
+//        PageDeviceResponse response = new PageDeviceResponse()
+//                .content(devices)
+//                .page(devicePage.getNumber())
+//                .size(devicePage.getSize())
+//                .totalElement(devicePage.getTotalElements())
+//                .totalPages(devicePage.getTotalPages());
+
+        return ResponseEntity.ok(pageDeviceMapper.toResponse(devicePage));
+    }
+
+    @Override
+    public ResponseEntity<DeviceResponse> updateDevice(Long id, DeviceRequest deviceRequest) {
+        log.info("API request to update device id={}", id);
+        Device updated = deviceMapper.toEntity(deviceRequest);
+        Device saved = deviceService.update(id, updated);
+        return ResponseEntity.ok(deviceMapper.toResponse(saved));
+    }
+
+
+    private Pageable buildPageable(Integer page, Integer size, String sort) {
 
         Sort sortObj = Sort.by("createdAt").descending();
 
@@ -68,35 +101,22 @@ public class DeviceController implements DevicesApi {
             String field = parts[0];
             Sort.Direction direction =
                     parts.length > 1 ? Sort.Direction.fromString(parts[1]) : Sort.Direction.ASC;
+
             sortObj = Sort.by(direction, field);
         }
-        Pageable pageable = PageRequest.of(page, size, sortObj);
 
-        Page<Device> devicePage = deviceService.findDevices(state, pageable);
-
-        List<DeviceResponse> devices = devicePage
-                .getContent()
-                .stream()
-                .map(deviceMapper::toResponse)
-                .toList();
-
-        PageDeviceResponse response = new PageDeviceResponse()
-                .content(devices)
-                .page(devicePage.getNumber())
-                .size(devicePage.getSize())
-                .totalElement(devicePage.getTotalElements())
-                .totalPages(devicePage.getTotalPages());
-
-        return ResponseEntity.ok(response);
+        return PageRequest.of(page, size, sortObj);
     }
 
-    @Override
-    public ResponseEntity<DeviceResponse> updateDevice(Long id, DeviceRequest deviceRequest) {
-        log.info("API request to update device id={}", id);
+    private DeviceState parseState(String state) {
 
-        Device updated = deviceMapper.toEntity(deviceRequest);
-        Device saved = deviceService.update(id, updated);
-
-        return ResponseEntity.ok(deviceMapper.toResponse(saved));
+        if (state == null || state.isBlank()) {
+            return null;
+        }
+        try {
+            return DeviceState.valueOf(state);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid device state: " + state);
+        }
     }
 }
