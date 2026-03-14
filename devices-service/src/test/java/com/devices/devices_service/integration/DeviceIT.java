@@ -45,17 +45,62 @@ public class DeviceIT {
                 }
                 """;
 
-        given()
+        Long id = given()
                 .contentType("application/json")
                 .body(requestBody)
                 .when()
                 .post("/devices")
                 .then()
                 .statusCode(201)
-                .body("name", equalTo("Printer"))
-                .body("brand", equalTo("HP"));
+                .extract()
+                .jsonPath().getLong("id");
+
+        given()
+                .when()
+                .get("/devices/{id}", id)
+                .then()
+                .statusCode(200)
+                .body("name", equalTo("Printer"));
     }
 
+    @Test
+    void shouldUpdateDevice() {
+
+        String create = """
+        {
+          "name": "Printer",
+          "brand": "HP",
+          "state": "AVAILABLE"
+        }
+        """;
+
+        Long id =
+                given()
+                        .contentType("application/json")
+                        .body(create)
+                        .when()
+                        .post("/devices")
+                        .then()
+                        .extract()
+                        .jsonPath().getLong("id");
+
+        String update = """
+        {
+          "name": "Printer Updated",
+          "brand": "HP",
+          "state": "AVAILABLE"
+        }
+        """;
+
+        given()
+                .contentType("application/json")
+                .body(update)
+                .when()
+                .put("/devices/{id}", id)
+                .then()
+                .statusCode(200)
+                .body("name", equalTo("Printer Updated"));
+    }
     @Test
     void shouldReturn404WhenDeviceNotFound() {
 
