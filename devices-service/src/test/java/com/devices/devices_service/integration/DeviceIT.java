@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -53,6 +54,69 @@ public class DeviceIT {
                 .statusCode(201)
                 .body("name", equalTo("Printer"))
                 .body("brand", equalTo("HP"));
+    }
+
+    @Test
+    void shouldReturn404WhenDeviceNotFound() {
+
+        given()
+                .when()
+                .get("/devices/{id}", 9999)
+                .then()
+                .statusCode(404)
+                .body("message", equalTo("Device not found with id: 9999"));
+    }
+
+    @Test
+    void shouldReturn400ForInvalidDeviceState() {
+
+        given()
+                .when()
+                .get("/devices?state=INVALID_STATE")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void shouldReturn400WhenRequestIsInvalid() {
+
+        String requestBody = """
+    {
+        "name": "",
+        "brand": "",
+        "state": "AVAILABLE"
+    }
+    """;
+
+        given()
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/devices")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingUnknownDevice() {
+
+        given()
+                .when()
+                .delete("/devices/{id}", 9999)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    void shouldReturnPagedDevices() {
+
+        given()
+                .when()
+                .get("/devices?page=0&size=10")
+                .then()
+                .statusCode(200)
+                .body("content", notNullValue())
+                .body("page", equalTo(0));
     }
 
 }

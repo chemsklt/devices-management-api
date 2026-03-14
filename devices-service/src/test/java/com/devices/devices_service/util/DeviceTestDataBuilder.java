@@ -13,7 +13,7 @@ public class DeviceTestDataBuilder {
         device.setName("Printer");
         device.setBrand("HP");
         device.setState(DeviceState.AVAILABLE);
-        device.setCreated_at(Instant.now());
+        device.setCreatedAt(Instant.now());
         return device;
     }
 }

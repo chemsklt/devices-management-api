@@ -34,7 +34,7 @@ public class DeviceController implements DevicesApi {
 
     @Override
     public ResponseEntity<DeviceResponse> createdDevice(@Valid @RequestBody DeviceRequest deviceRequest) {
-        log.info("API request to create device");
+        log.info("Creating device name={} brand={}", deviceRequest.getName(), deviceRequest.getBrand());
         Device device = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.create(device);
         DeviceResponse response = deviceMapper.toResponse(saved);
@@ -43,49 +43,30 @@ public class DeviceController implements DevicesApi {
 
     @Override
     public ResponseEntity<Void> deleteDevice(Long id) {
-        log.info("API request to delete device id={}", id);
+        log.info("Deleting device id={}", id);
         deviceService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<DeviceResponse> getDeviceById(Long id) {
-        log.info("API request to fetch device id={}", id);
+        log.info("Fetching device id={}", id);
         Device device = deviceService.findById(id);
         return ResponseEntity.ok(deviceMapper.toResponse(device));
     }
 
     @Override
     public ResponseEntity<PageDeviceResponse> getDevices(Integer page, Integer size, String sort, String state) {
-        log.info("API request to fetch all devices page={} size={} sort={}", page, size, sort);
-
+        log.info("Fetching all devices page={} size={} sort={}", page, size, sort);
         Pageable pageable = buildPageable(page, size, sort);
-
         Page<Device> devicePage = deviceService.findDevices(parseState(state), pageable);
-
-
-//        DeviceState domainState = parseState(state);
-//
-//        Page<Device> devicePage = deviceService.findDevices(domainState, pageable);
-//
-//        List<DeviceResponse> devices = devicePage.getContent()
-//                .stream()
-//                .map(deviceMapper::toResponse)
-//                .toList();
-//
-//        PageDeviceResponse response = new PageDeviceResponse()
-//                .content(devices)
-//                .page(devicePage.getNumber())
-//                .size(devicePage.getSize())
-//                .totalElement(devicePage.getTotalElements())
-//                .totalPages(devicePage.getTotalPages());
 
         return ResponseEntity.ok(pageDeviceMapper.toResponse(devicePage));
     }
 
     @Override
     public ResponseEntity<DeviceResponse> updateDevice(Long id, DeviceRequest deviceRequest) {
-        log.info("API request to update device id={}", id);
+        log.info("Updating device id={}", id);
         Device updated = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.update(id, updated);
         return ResponseEntity.ok(deviceMapper.toResponse(saved));

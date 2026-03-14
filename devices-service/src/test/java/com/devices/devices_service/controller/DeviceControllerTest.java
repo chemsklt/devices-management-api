@@ -1,6 +1,5 @@
 package com.devices.devices_service.controller;
 
-import com.devices.devices_service.controller.DeviceController;
 import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.exception.DeviceNotFoundException;
@@ -53,7 +52,7 @@ public class DeviceControllerTest {
         device.setName("Printer");
         device.setBrand("HP");
         device.setState(com.devices.devices_service.domain.DeviceState.AVAILABLE);
-        device.setCreated_at(Instant.now());
+        device.setCreatedAt(Instant.now());
 
         DeviceResponse response = new DeviceResponse()
                 .id(1L)
@@ -79,7 +78,7 @@ public class DeviceControllerTest {
         device.setName("Printer");
         device.setBrand("HP");
         device.setState(com.devices.devices_service.domain.DeviceState.AVAILABLE);
-        device.setCreated_at(Instant.now());
+        device.setCreatedAt(Instant.now());
 
         DeviceResponse response = new DeviceResponse()
                 .id(1L)

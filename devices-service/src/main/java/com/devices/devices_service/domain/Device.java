@@ -30,10 +30,10 @@ public class Device {
     private DeviceState state;
 
     @Column(nullable = false, updatable = false)
-    private Instant created_at;
+    private Instant createdAt;
 
     @PrePersist
     public void prePersist(){
-        this.created_at = Instant.now();
+        this.createdAt = Instant.now();
     }
 }
