@@ -57,10 +57,10 @@ public class DeviceController implements DevicesApi {
     }
 
     @Override
-    public ResponseEntity<PageDeviceResponse> getDevices(Integer page, Integer size, String sort, String state) {
+    public ResponseEntity<PageDeviceResponse> getDevices(Integer page, Integer size, String sort, String state, String brand) {
         log.info("Fetching all devices page={} size={} sort={}", page, size, sort);
         Pageable pageable = buildPageable(page, size, sort);
-        Page<Device> devicePage = deviceService.findDevices(parseState(state), pageable);
+        Page<Device> devicePage = deviceService.findDevices(parseState(state), brand, pageable);
 
         return ResponseEntity.ok(pageDeviceMapper.toResponse(devicePage));
     }

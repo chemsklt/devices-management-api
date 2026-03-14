@@ -224,7 +224,7 @@ public class DeviceControllerTest {
         mockMvc.perform(get("/devices?page=0&size=10"))
                 .andExpect(status().isOk());
 
-        verify(deviceService).findDevices(any(), any());
+        verify(deviceService).findDevices(any(), any(), any());
     }
 
     @Test
@@ -240,7 +240,7 @@ public class DeviceControllerTest {
         mockMvc.perform(get("/devices?page=0&size=10&sort=name,desc"))
                 .andExpect(status().isOk());
 
-        verify(deviceService).findDevices(any(), any());
+        verify(deviceService).findDevices(any(), any(), any());
     }
 
 

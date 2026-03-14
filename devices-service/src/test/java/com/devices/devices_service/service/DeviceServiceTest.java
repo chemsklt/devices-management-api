@@ -45,6 +45,7 @@ public class DeviceServiceTest {
     }
     private static final Long DEVICE_ID = 1L;
     private static final String DEVICE_NAME = "Printer";
+    private static final String DEVICE_BRAND = "HP";
 
     @Test
     @DisplayName("Should create a device successfully")
@@ -89,10 +90,40 @@ public class DeviceServiceTest {
         when(deviceRepository.findByState(DeviceState.AVAILABLE, pageable))
                 .thenReturn(page);
 
-        Page<Device> result = deviceService.findDevices(DeviceState.AVAILABLE, pageable);
+        Page<Device> result = deviceService.findDevices(DeviceState.AVAILABLE, null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
         verify(deviceRepository).findByState(DeviceState.AVAILABLE, pageable);
+    }
+
+    @Test
+    @DisplayName("Should find device by Brand")
+    void shouldFindDevicesByBrand() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Device> page = new PageImpl<>(List.of(device));
+
+        when(deviceRepository.findByBrand(DEVICE_BRAND, pageable))
+                .thenReturn(page);
+
+        Page<Device> result = deviceService.findDevices(null, DEVICE_BRAND, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(deviceRepository).findByBrand(DEVICE_BRAND, pageable);
+    }
+
+    @Test
+    @DisplayName("Should find device by State and Brand")
+    void shouldFindDevicesByStateAndBrand() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Device> page = new PageImpl<>(List.of(device));
+
+        when(deviceRepository.findByStateAndBrand(DeviceState.AVAILABLE, DEVICE_BRAND, pageable))
+                .thenReturn(page);
+
+        Page<Device> result = deviceService.findDevices(DeviceState.AVAILABLE, DEVICE_BRAND, pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        verify(deviceRepository).findByStateAndBrand(DeviceState.AVAILABLE, DEVICE_BRAND, pageable);
     }
 
     @Test
@@ -104,7 +135,7 @@ public class DeviceServiceTest {
         when(deviceRepository.findAll(pageable))
                 .thenReturn(page);
 
-        Page<Device> result = deviceService.findDevices(null, pageable);
+        Page<Device> result = deviceService.findDevices(null, null, pageable);
 
         assertThat(result.getContent()).hasSize(1);
         verify(deviceRepository).findAll(pageable);

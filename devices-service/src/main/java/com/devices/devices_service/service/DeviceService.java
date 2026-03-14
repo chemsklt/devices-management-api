@@ -43,12 +43,18 @@ public class DeviceService {
                 });
     }
 
-    public Page<Device> findDevices(DeviceState state, Pageable pageable) {
+    public Page<Device> findDevices(DeviceState state, String brand, Pageable pageable) {
 
-        log.info("Fetching devices with filter state={}", state);
+        log.info("Fetching devices with filter state={} brand={}", state, brand);
 
-        if (state != null) {
+        if (state != null && brand != null) {
+            return deviceRepository.findByStateAndBrand(state, brand, pageable);
+        }
+        if (state != null){
             return deviceRepository.findByState(state, pageable);
+        }
+        if (brand != null){
+            return deviceRepository.findByBrand(brand, pageable);
         }
 
         return deviceRepository.findAll(pageable);
