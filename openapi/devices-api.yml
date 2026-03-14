@@ -102,7 +102,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeviceRequest'
+              $ref: '#/components/schemas/DeviceUpdateRequest'
       responses:
         '200':
           description: Device update
@@ -146,9 +146,6 @@ components:
           maxLength: 100
         state:
           $ref: '#/components/schemas/DeviceState'
-        version:
-          type: integer
-          format: int64
     DeviceResponse:
       type: object
       properties:
@@ -161,12 +158,13 @@ components:
           type: string
         state:
           $ref: '#/components/schemas/DeviceState'
-        created_at:
+        createdAt:
           type: string
           format: date-time
         version:
           type: integer
           format: int64
+          description: Used for optimistic locking during updates
     DeviceState:
       type: string
       x-java-type: com.devices.devices_service.domain.DeviceState
@@ -186,3 +184,20 @@ components:
           format: int64
         totalPages:
           type: integer
+    DeviceUpdateRequest:
+      type: object
+      required:
+        - name
+        - brand
+        - state
+        - version
+      properties:
+       name:
+        type: string
+       brand:
+        type: string
+       state:
+          $ref: '#/components/schemas/DeviceState'
+       version:
+         type: integer
+         format: int64

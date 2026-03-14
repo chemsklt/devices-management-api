@@ -6,6 +6,7 @@ import com.devices.devices_service.exception.DeviceInUseException;
 import com.devices.devices_service.exception.DeviceNotFoundException;
 import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
+import com.devices.devices_service.generated.model.DeviceUpdateRequest;
 import com.devices.devices_service.mapper.DeviceMapper;
 import com.devices.devices_service.mapper.PageDeviceMapper;
 import com.devices.devices_service.service.DeviceService;
@@ -61,7 +62,7 @@ public class DeviceControllerTest {
                 .brand("HP")
                 .state(DeviceState.AVAILABLE.name());
 
-        when(deviceMapper.toEntity(any())).thenReturn(device);
+        when(deviceMapper.toEntity(any(DeviceRequest.class))).thenReturn(device);
         when(deviceService.create(any())).thenReturn(device);
         when(deviceMapper.toResponse(any())).thenReturn(response);
 
@@ -140,7 +141,7 @@ public class DeviceControllerTest {
                 .brand("HP")
                 .state(DeviceState.IN_USE.name());
 
-        when(deviceMapper.toEntity(any())).thenReturn(new Device());
+        when(deviceMapper.toEntity(any(DeviceRequest.class))).thenReturn(new Device());
         when(deviceService.create(any()))
                 .thenThrow(new DeviceInUseException(1L));
 
@@ -160,12 +161,13 @@ public class DeviceControllerTest {
     @Test
     void shouldReturn409WhenOptimisticLockingFails() throws Exception {
 
-        DeviceRequest request = new DeviceRequest()
-                .name("Printer")
+        DeviceUpdateRequest request = new DeviceUpdateRequest()
+                .name("Printer Updated")
                 .brand("HP")
-                .state(DeviceState.AVAILABLE.name());
+                .state(DeviceState.AVAILABLE.name())
+                .version(0L);
 
-        when(deviceMapper.toEntity(any())).thenReturn(new Device());
+        when(deviceMapper.toEntity(any(DeviceUpdateRequest.class))).thenReturn(new Device());
         when(deviceService.update(eq(1L), any()))
                 .thenThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(Device.class, 1L));
 
@@ -187,10 +189,11 @@ public class DeviceControllerTest {
 
     @Test
     void shouldUpdateDevice() throws Exception{
-            DeviceRequest request = new DeviceRequest()
-                    .name("Printer Updated")
-                    .brand("HP")
-                    .state(DeviceState.AVAILABLE.name());
+        DeviceUpdateRequest request = new DeviceUpdateRequest()
+                .name("Printer Updated")
+                .brand("HP")
+                .state(DeviceState.AVAILABLE.name())
+                .version(0L);
 
             Device device = new Device();
             device.setId(1L);
@@ -204,7 +207,7 @@ public class DeviceControllerTest {
                     .brand("HP")
                     .state(DeviceState.AVAILABLE.name());
 
-            when(deviceMapper.toEntity(any())).thenReturn(device);
+            when(deviceMapper.toEntity(any(DeviceUpdateRequest.class))).thenReturn(device);
             when(deviceService.update(eq(1L), any())).thenReturn(device);
             when(deviceMapper.toResponse(any())).thenReturn(response);
 

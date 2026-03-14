@@ -3,6 +3,7 @@ package com.devices.devices_service.mapper;
 import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
+import com.devices.devices_service.generated.model.DeviceUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -17,6 +18,8 @@ public interface DeviceMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.Instant.now())")
     Device toEntity(DeviceRequest request);
     DeviceResponse toResponse(Device device);
+    @Mapping(target = "version", source = "version")
+    Device toEntity(DeviceUpdateRequest request);
 
     default OffsetDateTime map(Instant value) {
         if (value == null) {

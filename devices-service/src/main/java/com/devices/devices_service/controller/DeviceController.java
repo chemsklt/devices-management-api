@@ -5,6 +5,7 @@ import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.generated.api.DevicesApi;
 import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
+import com.devices.devices_service.generated.model.DeviceUpdateRequest;
 import com.devices.devices_service.generated.model.PageDeviceResponse;
 import com.devices.devices_service.mapper.DeviceMapper;
 import com.devices.devices_service.mapper.PageDeviceMapper;
@@ -65,7 +66,7 @@ public class DeviceController implements DevicesApi {
     }
 
     @Override
-    public ResponseEntity<DeviceResponse> updateDevice(Long id, DeviceRequest deviceRequest) {
+    public ResponseEntity<DeviceResponse> updateDevice(Long id, DeviceUpdateRequest deviceRequest) {
         log.info("Updating device id={}", id);
         Device updated = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.update(id, updated);
