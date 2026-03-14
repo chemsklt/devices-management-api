@@ -32,6 +32,9 @@ public class Device {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Version
+    private Long version;
+
     @PrePersist
     public void prePersist(){
         this.createdAt = Instant.now();
