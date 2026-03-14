@@ -14,6 +14,7 @@ public class DeviceTestDataBuilder {
         device.setBrand("HP");
         device.setState(DeviceState.AVAILABLE);
         device.setCreatedAt(Instant.now());
+        device.setVersion(0L);
         return device;
     }
 }
