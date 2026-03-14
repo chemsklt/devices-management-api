@@ -5,6 +5,7 @@ import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -14,10 +15,9 @@ import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
 public class DeviceMapperTest {
-    @Autowired
-    private DeviceMapper mapper;
+    private final DeviceMapper mapper = Mappers.getMapper(DeviceMapper.class);
+
 
     @Test
     void shouldMapRequestToEntity() {

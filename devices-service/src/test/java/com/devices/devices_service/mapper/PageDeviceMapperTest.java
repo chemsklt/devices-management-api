@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+
 public class PageDeviceMapperTest {
 
     private final DeviceMapper deviceMapper = mock(DeviceMapper.class);
