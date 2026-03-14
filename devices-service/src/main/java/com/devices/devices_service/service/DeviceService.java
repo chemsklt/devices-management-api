@@ -4,6 +4,8 @@ import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.exception.DeviceInUseException;
 import com.devices.devices_service.exception.DeviceNotFoundException;
+import com.devices.devices_service.generated.model.DevicePatchRequest;
+import com.devices.devices_service.mapper.DeviceMapper;
 import com.devices.devices_service.repository.DeviceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 public class DeviceService {
 
     private final DeviceRepository deviceRepository;
+    private final DeviceMapper deviceMapper;
 
     public Device create(Device device){
         log.info("Creating device with name={} and brand={}", device.getName(), device.getBrand());
@@ -79,6 +82,27 @@ public class DeviceService {
 
         Device savedDevice = deviceRepository.save(existing);
         log.info("Device updated successfully id={}", id);
+        return savedDevice;
+
+    }
+
+    @Transactional
+    public Device patch(Long id, DevicePatchRequest request){
+        log.info("Partially updating device id={}", id);
+        Device existing = findById(id);
+
+        if (existing.getState() == DeviceState.IN_USE){
+            log.warn("Attempt to update IN_USE device id={}", id);
+            throw new DeviceInUseException(id);
+        }
+        if (!existing.getVersion().equals(request.getVersion())) {
+            throw new ObjectOptimisticLockingFailureException(Device.class, id);
+        }
+
+        deviceMapper.patchDevice(request, existing);
+
+        Device savedDevice = deviceRepository.save(existing);
+        log.info("Device partially updated successfully id={}", id);
         return savedDevice;
 
     }

@@ -3,10 +3,7 @@ package com.devices.devices_service.controller;
 import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.generated.api.DevicesApi;
-import com.devices.devices_service.generated.model.DeviceRequest;
-import com.devices.devices_service.generated.model.DeviceResponse;
-import com.devices.devices_service.generated.model.DeviceUpdateRequest;
-import com.devices.devices_service.generated.model.PageDeviceResponse;
+import com.devices.devices_service.generated.model.*;
 import com.devices.devices_service.mapper.DeviceMapper;
 import com.devices.devices_service.mapper.PageDeviceMapper;
 import com.devices.devices_service.service.DeviceService;
@@ -70,6 +67,13 @@ public class DeviceController implements DevicesApi {
         log.info("Updating device id={}", id);
         Device updated = deviceMapper.toEntity(deviceRequest);
         Device saved = deviceService.update(id, updated);
+        return ResponseEntity.ok(deviceMapper.toResponse(saved));
+    }
+
+    @Override
+    public ResponseEntity<DeviceResponse> patchDevice(Long id, DevicePatchRequest devicePatchRequest) {
+        log.info("Partially Updating device id={}", id);
+        Device saved = deviceService.patch(id, devicePatchRequest);
         return ResponseEntity.ok(deviceMapper.toResponse(saved));
     }
 

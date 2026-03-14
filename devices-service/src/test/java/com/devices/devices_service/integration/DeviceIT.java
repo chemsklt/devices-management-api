@@ -1,13 +1,18 @@
 package com.devices.devices_service.integration;
 
+import com.devices.devices_service.domain.Device;
+import com.devices.devices_service.domain.DeviceState;
+import com.devices.devices_service.repository.DeviceRepository;
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import org.springframework.http.MediaType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -15,10 +20,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 public class DeviceIT {
+
+    @Autowired
+    private DeviceRepository deviceRepository;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Container
     @ServiceConnection
@@ -237,6 +251,33 @@ public class DeviceIT {
                 .put("/devices/{id}", id)
                 .then()
                 .statusCode(409);
+    }
+
+    @Test
+    void shouldPatchDeviceState() throws Exception {
+
+        Device saved = deviceRepository.save(
+                Device.builder()
+                        .name("Printer")
+                        .brand("HP")
+                        .state(DeviceState.AVAILABLE)
+                        .build()
+        );
+
+        String body = """
+        {
+          "state": "IN_USE",
+          "version": %d
+        }
+        """.formatted(saved.getVersion());
+
+        mockMvc.perform(
+                        patch("/devices/{id}", saved.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state").value("IN_USE"));
     }
 
 }

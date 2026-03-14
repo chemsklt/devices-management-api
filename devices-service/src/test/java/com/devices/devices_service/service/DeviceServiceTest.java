@@ -4,13 +4,15 @@ import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
 import com.devices.devices_service.exception.DeviceInUseException;
 import com.devices.devices_service.exception.DeviceNotFoundException;
+import com.devices.devices_service.generated.model.DevicePatchRequest;
+import com.devices.devices_service.mapper.DeviceMapper;
 import com.devices.devices_service.repository.DeviceRepository;
 import com.devices.devices_service.util.DeviceTestDataBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -23,9 +25,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +35,8 @@ public class DeviceServiceTest {
     @Mock
     private DeviceRepository deviceRepository;
 
-    @InjectMocks
+    private final DeviceMapper deviceMapper = Mappers.getMapper(DeviceMapper.class);
+
     private DeviceService deviceService;
 
     private Device device;
@@ -42,6 +44,7 @@ public class DeviceServiceTest {
     @BeforeEach
     void setup() {
         device = DeviceTestDataBuilder.device();
+        deviceService = new DeviceService(deviceRepository, deviceMapper);
     }
     private static final Long DEVICE_ID = 1L;
     private static final String DEVICE_NAME = "Printer";
@@ -220,5 +223,46 @@ public class DeviceServiceTest {
         assertThat(result.getName()).isEqualTo("Scanner");
 
         verify(deviceRepository).save(existing);
+    }
+
+    @Test
+    @DisplayName("Should patch device state")
+    void shouldPatchDeviceState() {
+
+        Device existing = DeviceTestDataBuilder.device();
+        existing.setVersion(1L);
+
+        DevicePatchRequest patch = new DevicePatchRequest();
+        patch.setState(DeviceState.IN_USE.name());
+        patch.setVersion(1L);
+
+        when(deviceRepository.findById(DEVICE_ID))
+                .thenReturn(Optional.of(existing));
+
+        when(deviceRepository.save(any(Device.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Device result = deviceService.patch(DEVICE_ID, patch);
+
+        assertThat(result.getState()).isEqualTo(DeviceState.IN_USE);
+
+        verify(deviceRepository).save(existing);
+    }
+
+    @Test
+    @DisplayName("Should fail patch when version mismatch")
+    void shouldFailPatchWhenVersionMismatch() {
+
+        Device existing = DeviceTestDataBuilder.device();
+        existing.setVersion(1L);
+
+        DevicePatchRequest patch = new DevicePatchRequest();
+        patch.setVersion(2L);
+
+        when(deviceRepository.findById(DEVICE_ID))
+                .thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> deviceService.patch(DEVICE_ID, patch))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 }

@@ -115,6 +115,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceResponse'
+    patch:
+      tags:
+        - Devices
+      summary: Partially update a device
+      operationId: patchDevice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePatchRequest'
+      responses:
+        '200':
+          description: Device update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
 
     delete:
       tags:
@@ -206,3 +231,17 @@ components:
        version:
          type: integer
          format: int64
+    DevicePatchRequest:
+      type: object
+      required:
+        - version
+      properties:
+        name:
+          type: string
+        brand:
+          type: string
+        state:
+          $ref: '#/components/schemas/DeviceState'
+        version:
+          type: integer
+          format: int64
