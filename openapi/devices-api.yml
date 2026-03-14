@@ -146,6 +146,9 @@ components:
           maxLength: 100
         state:
           $ref: '#/components/schemas/DeviceState'
+        version:
+          type: integer
+          format: int64
     DeviceResponse:
       type: object
       properties:
@@ -161,6 +164,9 @@ components:
         created_at:
           type: string
           format: date-time
+        version:
+          type: integer
+          format: int64
     DeviceState:
       type: string
       x-java-type: com.devices.devices_service.domain.DeviceState

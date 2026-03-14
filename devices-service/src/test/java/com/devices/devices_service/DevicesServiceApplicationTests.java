@@ -10,4 +10,9 @@ class DevicesServiceApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void mainShouldStartApplication() {
+		DevicesServiceApplication.main(new String[]{});
+	}
+
 }

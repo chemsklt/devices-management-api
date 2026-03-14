@@ -2,6 +2,7 @@ package com.devices.devices_service.controller;
 
 import com.devices.devices_service.domain.Device;
 import com.devices.devices_service.domain.DeviceState;
+import com.devices.devices_service.exception.DeviceInUseException;
 import com.devices.devices_service.exception.DeviceNotFoundException;
 import com.devices.devices_service.generated.model.DeviceRequest;
 import com.devices.devices_service.generated.model.DeviceResponse;
@@ -129,6 +130,114 @@ public class DeviceControllerTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn409WhenDeviceInUse() throws Exception {
+
+        DeviceRequest request = new DeviceRequest()
+                .name("Printer")
+                .brand("HP")
+                .state(DeviceState.IN_USE.name());
+
+        when(deviceMapper.toEntity(any())).thenReturn(new Device());
+        when(deviceService.create(any()))
+                .thenThrow(new DeviceInUseException(1L));
+
+        mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn400WhenIllegalArgument() throws Exception {
+
+        mockMvc.perform(get("/devices?state=INVALID_STATE"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn409WhenOptimisticLockingFails() throws Exception {
+
+        DeviceRequest request = new DeviceRequest()
+                .name("Printer")
+                .brand("HP")
+                .state(DeviceState.AVAILABLE.name());
+
+        when(deviceMapper.toEntity(any())).thenReturn(new Device());
+        when(deviceService.update(eq(1L), any()))
+                .thenThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(Device.class, 1L));
+
+        mockMvc.perform(put("/devices/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn500WhenUnexpectedError() throws Exception {
+
+        when(deviceService.findById(1L))
+                .thenThrow(new RuntimeException("Unexpected"));
+
+        mockMvc.perform(get("/devices/1"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void shouldUpdateDevice() throws Exception{
+            DeviceRequest request = new DeviceRequest()
+                    .name("Printer Updated")
+                    .brand("HP")
+                    .state(DeviceState.AVAILABLE.name());
+
+            Device device = new Device();
+            device.setId(1L);
+            device.setName("Printer Updated");
+            device.setBrand("HP");
+            device.setState(com.devices.devices_service.domain.DeviceState.AVAILABLE);
+
+            DeviceResponse response = new DeviceResponse()
+                    .id(1L)
+                    .name("Printer Updated")
+                    .brand("HP")
+                    .state(DeviceState.AVAILABLE.name());
+
+            when(deviceMapper.toEntity(any())).thenReturn(device);
+            when(deviceService.update(eq(1L), any())).thenReturn(device);
+            when(deviceMapper.toResponse(any())).thenReturn(response);
+
+            mockMvc.perform(put("/devices/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("Printer Updated"));
+    }
+
+    @Test
+    void shouldReturnPagedDevices() throws Exception {
+
+        mockMvc.perform(get("/devices?page=0&size=10"))
+                .andExpect(status().isOk());
+
+        verify(deviceService).findDevices(any(), any());
+    }
+
+    @Test
+    void shouldReturn400WhenStateInvalid() throws Exception {
+
+        mockMvc.perform(get("/devices?state=INVALID"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnDevicesWithSorting() throws Exception {
+
+        mockMvc.perform(get("/devices?page=0&size=10&sort=name,desc"))
+                .andExpect(status().isOk());
+
+        verify(deviceService).findDevices(any(), any());
     }
 
 
