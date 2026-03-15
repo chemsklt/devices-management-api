@@ -1,4 +1,12 @@
 # devices-management-api
+
+![Java](https://img.shields.io/badge/Java-21-blue)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3.x-brightgreen)
+![Build](https://img.shields.io/badge/build-Maven-blue)
+![Docker](https://img.shields.io/badge/docker-supported-blue)
+![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)
+![CI](https://github.com/chemsklt/devices-management-api/actions/workflows/ci.yml/badge.svg)
+
 A RESTful API for managing devices resources built with **Java 21, spring Boot, PostgresSQL, and Docker**.
 
 The project follows an **API-First approach using OpenAPI 3.0** and supports :
@@ -126,4 +134,6 @@ Several improvement could be implemented to future enhance the system and make i
 - CI/CD improvements.
 - Deploy containers using Kubernetes for scalability and orchestration.
 
+### Database Management
+- Introduce database schema versioning using **Flyway** or **Liquibase** to manage DB migration in a controlled and repeatable database migrations across environments.
 
